@@ -10,6 +10,7 @@
         <Reference Include="$(DuckovPath)\Duckov_Data\Managed\TeamSoda.*" />
         <Reference Include="$(DuckovPath)\Duckov_Data\Managed\ItemStatsSystem.dll" />
 	    <Reference Include="$(DuckovPath)\Duckov_Data\Managed\SodaLocalization.dll" />
+	    <Reference Include="$(DuckovPath)\Duckov_Data\Managed\Newtonsoft.Json.dll" />
         <Reference Include="$(DuckovPath)\Duckov_Data\Managed\Unity*" />
   </ItemGroup>
   <ItemGroup>

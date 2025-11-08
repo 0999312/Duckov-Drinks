@@ -125,15 +125,16 @@ namespace DuckovDrinks
             {
                 string dllPath = Assembly.GetExecutingAssembly().Location;
                 string modDirectory = Path.GetDirectoryName(dllPath);
-
-                string textureLoc = Path.Combine(modDirectory, resourceName);
-                if(File.Exists(textureLoc) == false)
+                StringBuilder assetLoc = new StringBuilder($"assets/{Constants.MODID}/textures/");
+                assetLoc.Append(resourceName);
+                string fileLoc = Path.Combine(modDirectory, assetLoc.ToString());
+                if(File.Exists(fileLoc) == false)
                 {
-                    Debug.LogError("EmbeddedSprite is missing: " + resourceName);
+                    Debug.LogError("EmbeddedSprite is missing: " + fileLoc);
                     return null;
                 }
 
-                byte[] ImageArray = File.ReadAllBytes(textureLoc);
+                byte[] ImageArray = File.ReadAllBytes(fileLoc);
                 Texture2D texture2D = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false);
                 if (!texture2D.LoadImage(ImageArray))
                 {

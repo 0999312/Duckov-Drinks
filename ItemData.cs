@@ -66,10 +66,8 @@ namespace DuckovDrinks
 
     public class AddBuffData : UsageBehaviorData
     {
-        public Buff buff;
-        public float chance = 1f;
-
-        
+       public Buff buff;
+       public float chance = 1f;
        public override string type { get; } = "AddBuff"; 
     }
 
