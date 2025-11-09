@@ -1,10 +1,20 @@
 {
-    "Drink01":"酸梅汤",
-    "Drink01_Desc":"传统夏日解暑饮品",
-    "Drink02":"纯牛奶",
-    "Drink02_Desc":"全脂纯牛奶",
-    "Drink03":"冰红茶",
-    "Drink03_Desc":"在鸭星也非常出名的冰红茶",
-    "Drink04":"营养快线",
-    "Drink04_Desc":"苹果风味牛奶"
+    "Suanmeitang":"酸梅汤",
+    "Suanmeitang_Desc":"传统夏日解暑饮品",
+    "WholeMilk":"纯牛奶",
+    "WholeMilk_Desc":"全脂纯牛奶",
+    "IcedTea":"冰红茶",
+    "IcedTea_Desc":"在鸭星也非常出名的冰红茶",
+    "AppleMilk":"营养快线",
+    "AppleMilk_Desc":"苹果风味牛奶",
+    "WhiteSugar":"白砂糖",
+    "WhiteSugar_Desc":"精品白砂糖",
+    "OrangeSoda":"橙子汽水",
+    "OrangeSoda_Desc":"小窖牌汽水",
+    "SodaCanLemon":"罐装柠檬风味汽水",
+    "SodaCanLemon_Desc":"没有柠檬。",
+    "SodaCanApple":"罐装苹果汽水",
+    "SodaCanApple_Desc": "青苹果口味",
+    "SodaCanOrange":"罐装橙子汽水",
+    "SodaCanOrange_Desc":"小罐汽水，小师作"
 }

@@ -1,6 +1,7 @@
 ﻿using Duckov.Economy;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
@@ -22,9 +23,12 @@ namespace DuckovDrinks
             List<DecomposeFormula> list = new List<DecomposeFormula>(collection);
             foreach (DecomposeFormula item2 in list)
             {
-                if (item2.item == itemId)
+                if (item2.item == itemId && item2.result.items.Any())
                 {
                     Debug.LogWarning($"Existed decompose formula, item: {itemId}");
+                    foreach(var itemResult in item2.result.items){
+                        Debug.LogWarning($"itemResult: {itemResult.id} : {itemResult.amount}");
+                    }
                     return;
                 }
             }

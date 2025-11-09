@@ -1,10 +1,20 @@
 {
-    "Drink01":"Sour Plum Drink",
-    "Drink01_Desc":"Relief from the heat!",
-    "Drink02":"Whole Milk",
-    "Drink02_Desc":"100% whole milk",
-    "Drink03":"Iced Tea",
-    "Drink03_Desc":"The best iced tea, what can I say!",
-    "Drink04":"Nutri-Express",
-    "Drink04_Desc":"Apple flavor milk drink"
+    "Suanmeitang":"Sour Plum Drink",
+    "Suanmeitang_Desc":"Relief from the heat!",
+    "WholeMilk":"Whole Milk",
+    "WholeMilk_Desc":"100% whole milk",
+    "IcedTea":"Iced Tea",
+    "IcedTea_Desc":"The best iced tea, what can I say!",
+    "AppleMilk":"Nutri-Express",
+    "AppleMilk_Desc":"Apple flavor milk drink",
+    "WhiteSugar":"White Sugar",
+    "WhiteSugar_Desc":"Pure white sugar",
+    "OrangeSoda":"Bottle Orange Soda",
+    "OrangeSoda_Desc":"So Fantastic",
+    "SodaCanLemon":"Lemon Soda",
+    "SodaCanLemon_Desc":"0% lemon juice used.",
+    "SodaCanApple":"Apple Soda",
+    "SodaCanApple_Desc":"Like Apple Cider",
+    "SodaCanOrange":"Orange Soda",
+    "SodaCanOrange_Desc":"Fantastic"
 }

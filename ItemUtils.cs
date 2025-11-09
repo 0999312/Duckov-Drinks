@@ -1,4 +1,5 @@
-﻿using Duckov.ItemUsage;
+﻿using Duckov.Buffs;
+using Duckov.ItemUsage;
 using Duckov.Modding;
 using Duckov.Utilities;
 using ItemStatsSystem;
@@ -32,12 +33,14 @@ namespace DuckovDrinks
             item.AddComponent<UsageUtilities>();
             UsageUtilities usageUtilities = item.GetComponent<UsageUtilities>();
 
-            if (config.usages.useSound != string.Empty)
+            if (config.usages.useSound != string.Empty) {
+                usageUtilities.hasSound = true;
                 usageUtilities.useSound = config.usages.useSound;
-
-            if (config.usages.actionSound != string.Empty)
+            }
+            if (config.usages.actionSound != string.Empty) {
+                usageUtilities.hasSound = true;
                 usageUtilities.actionSound = config.usages.actionSound;
-
+            }
             if (config.usages.useDurability && config.maxDurability > 0) {
                 usageUtilities.useDurability = true;
                 usageUtilities.durabilityUsage = config.usages.durabilityUsage;
@@ -45,7 +48,7 @@ namespace DuckovDrinks
 
             FieldInfo useTimeField = typeof(UsageUtilities).GetField("useTime", BindingFlags.Instance | BindingFlags.NonPublic);
             if (useTimeField != null)
-                useTimeField.SetValue(usageUtilities, config.usages.useTime);
+                useTimeField.SetValueOptimized(usageUtilities, config.usages.useTime);
             SetPrivateField(item, "usageUtilities", usageUtilities);
 
             foreach (var behavior in config.usages.behaviors)
@@ -64,7 +67,7 @@ namespace DuckovDrinks
             {
                 case "FoodDrink":
                     {
-                        FoodData foodData = behaviorData as FoodData;
+                        FoodData? foodData = behaviorData as FoodData;
                         if (foodData != null)
                         {
                             FoodDrink foodDrinkBehavior = item.AddComponent<FoodDrink>();
@@ -77,7 +80,7 @@ namespace DuckovDrinks
                     }
                 case "Drug":
                     {
-                        HealData healData = behaviorData as HealData;
+                        HealData? healData = behaviorData as HealData;
                         if (healData != null)
                         {
                             Drug drugBehavior = item.AddComponent<Drug>();
@@ -89,11 +92,12 @@ namespace DuckovDrinks
                     }
                 case "AddBuff":
                     {
-                        AddBuffData addBuffData = behaviorData as AddBuffData;
-                        if (addBuffData != null)
+                        AddBuffData? addBuffData = behaviorData as AddBuffData;
+                        Buff? buff = addBuffData != null ? AddBuffData.findBuff(addBuffData.buff) : null;
+                        if (addBuffData != null && buff != null)
                         {
                             AddBuff addBuffBehavior = item.AddComponent<AddBuff>();
-                            addBuffBehavior.buffPrefab = addBuffData.buff;
+                            addBuffBehavior.buffPrefab = buff;
                             addBuffBehavior.chance = addBuffData.chance;
                             usageUtilities.behaviors.Add(addBuffBehavior);
                             return;
@@ -102,7 +106,7 @@ namespace DuckovDrinks
                     }
                 case "RemoveBuff":
                     {
-                        RemoveBuffData removeBuffData = behaviorData as RemoveBuffData;
+                        RemoveBuffData? removeBuffData = behaviorData as RemoveBuffData;
                         if (removeBuffData != null)
                         {
                             RemoveBuff buffBehavior = item.AddComponent<RemoveBuff>();
@@ -168,7 +172,6 @@ namespace DuckovDrinks
                 gameObject.AddComponent<Item>();
                 Item component = gameObject.GetComponent<Item>();
                 SetItemProperties(component, config);
-                SetLocalizationTexts(config);
                 SetItemIcon(component,config);
                 RegisterItem(component);
             }
@@ -210,7 +213,7 @@ namespace DuckovDrinks
             FieldInfo field = typeof(Item).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
             if (field != null)
             {
-                field.SetValue(item, value);
+                field.SetValueOptimized(item, value);
                 return true;
             }
             Debug.LogWarning($"Couldn't find field: {fieldName}");
@@ -222,24 +225,20 @@ namespace DuckovDrinks
             FieldInfo field = typeof(Item).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
             if (field != null)
             {
-                return field.GetValue(item);
+                return field.GetValueOptimized(item);
             }
             Debug.LogWarning($"Couldn't find field: {fieldName}");
             return null;
         }
 
-        public static void SetLocalizationTexts(ItemData config)
-        {
-            LocalizationManager.SetOverrideText(config.localizationKey, config.displayName);
-            LocalizationManager.SetOverrideText(config.localizationDesc, config.localizationDescValue);
-        }
         private static void SetItemIcon(Item item, ItemData config)
         {
             FieldInfo field = typeof(Item).GetField("icon", BindingFlags.Instance | BindingFlags.NonPublic);
+
             if (field != null)
             {
                 Sprite sprite = ItemUtils.LoadEmbeddedSprite(config.embeddedSpritePath, config.itemId);
-                field.SetValue(item, sprite);
+                field.SetValueOptimized(item, sprite);
             }
         }
 

@@ -1,7 +1,10 @@
 ﻿using Duckov.Buffs;
+using ItemStatsSystem;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace DuckovDrinks
 {
@@ -11,13 +14,9 @@ namespace DuckovDrinks
 
         public int order = 0;
 
-        public string displayName = string.Empty;
-
         public string localizationKey = string.Empty;
 
         public string localizationDesc = string.Empty;
-
-        public string localizationDescValue = string.Empty;
 
         public float weight;
 
@@ -28,6 +27,7 @@ namespace DuckovDrinks
         public float maxDurability = 0f;
 
         public int quality;
+        public DisplayQuality displayQuality = DisplayQuality.None;
 
         public string embeddedSpritePath = string.Empty;
 
@@ -66,9 +66,15 @@ namespace DuckovDrinks
 
     public class AddBuffData : UsageBehaviorData
     {
-       public Buff buff;
+       public int buff;
        public float chance = 1f;
-       public override string type { get; } = "AddBuff"; 
+       public override string type { get; } = "AddBuff";
+
+       public static Buff findBuff(int id) {
+           Buff[] allBuffs = Resources.FindObjectsOfTypeAll<Buff>();
+           Buff buffPrefab = allBuffs.FirstOrDefault(b => b != null && b.ID == id);
+           return buffPrefab;
+       }
     }
 
     public class RemoveBuffData : UsageBehaviorData
