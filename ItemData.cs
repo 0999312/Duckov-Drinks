@@ -29,7 +29,7 @@ namespace DuckovDrinks
         public int quality;
         public DisplayQuality displayQuality = DisplayQuality.None;
 
-        public string embeddedSpritePath = string.Empty;
+        public string spritePath = string.Empty;
 
         public List<string> tags = new List<string>();
 

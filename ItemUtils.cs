@@ -1,4 +1,5 @@
 ﻿using Duckov.Buffs;
+using Duckov.ItemBuilders;
 using Duckov.ItemUsage;
 using Duckov.Modding;
 using Duckov.Utilities;
@@ -30,8 +31,13 @@ namespace DuckovDrinks
             if (config.usages == null)
                 return;
 
-            item.AddComponent<UsageUtilities>();
-            UsageUtilities usageUtilities = item.GetComponent<UsageUtilities>();
+            item.AddUsageUtilitiesComponent();
+            UsageUtilities usageUtilities = item.UsageUtilities;
+
+            FieldInfo useTimeField = typeof(UsageUtilities).GetField("useTime", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (useTimeField != null)
+                useTimeField.SetValueOptimized(usageUtilities, config.usages.useTime);
+            SetPrivateField(item, "usageUtilities", usageUtilities);
 
             if (config.usages.useSound != string.Empty) {
                 usageUtilities.hasSound = true;
@@ -46,14 +52,10 @@ namespace DuckovDrinks
                 usageUtilities.durabilityUsage = config.usages.durabilityUsage;
             }
 
-            FieldInfo useTimeField = typeof(UsageUtilities).GetField("useTime", BindingFlags.Instance | BindingFlags.NonPublic);
-            if (useTimeField != null)
-                useTimeField.SetValueOptimized(usageUtilities, config.usages.useTime);
-            SetPrivateField(item, "usageUtilities", usageUtilities);
-
+            //item.AgentUtilities.CreateAgent();
             foreach (var behavior in config.usages.behaviors)
             {
-                 createBehavior(item, behavior, item.UsageUtilities);
+                 createBehavior(item, behavior, usageUtilities);
             }
 
         }
@@ -167,13 +169,16 @@ namespace DuckovDrinks
         {
             try
             {
-                GameObject gameObject = new GameObject($"GameObject_{config.localizationKey}");
-                UnityEngine.Object.DontDestroyOnLoad(gameObject);
-                gameObject.AddComponent<Item>();
-                Item component = gameObject.GetComponent<Item>();
+                Item component = ItemBuilder.New()
+                    .TypeID(config.itemId)
+                    .EnableStacking(config.maxStackCount, 1)
+                    .Icon(ItemUtils.LoadEmbeddedSprite(config.spritePath, config.itemId))
+                    .Instantiate();
+                UnityEngine.Object.DontDestroyOnLoad (component);
                 SetItemProperties(component, config);
-                SetItemIcon(component,config);
+                
                 RegisterItem(component);
+                
             }
             catch (Exception arg)
             {
@@ -183,14 +188,14 @@ namespace DuckovDrinks
 
         public static void SetItemProperties(Item item, ItemData config)
         {
-            SetPrivateField(item, "typeID", config.itemId);
-            SetPrivateField(item, "order", config.order);
+            //SetPrivateField(item, "order", config.order);
             SetPrivateField(item, "weight", config.weight);
-            SetPrivateField(item, "value", config.value);
-            SetPrivateField(item, "displayName", config.localizationKey);
-            SetPrivateField(item, "quality", config.quality);
-            
-            item.MaxStackCount = config.maxStackCount;
+ 
+            item.Order = config.order;
+            item.Value = config.value;
+            item.Quality = config.quality;
+
+            item.DisplayNameRaw = config.localizationKey;
             item.MaxDurability = config.maxDurability;
             item.Durability = config.maxDurability;
 
@@ -218,28 +223,6 @@ namespace DuckovDrinks
             }
             Debug.LogWarning($"Couldn't find field: {fieldName}");
             return false;
-        }
-
-        public static object GetPrivateField(Item item, string fieldName)
-        {
-            FieldInfo field = typeof(Item).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
-            if (field != null)
-            {
-                return field.GetValueOptimized(item);
-            }
-            Debug.LogWarning($"Couldn't find field: {fieldName}");
-            return null;
-        }
-
-        private static void SetItemIcon(Item item, ItemData config)
-        {
-            FieldInfo field = typeof(Item).GetField("icon", BindingFlags.Instance | BindingFlags.NonPublic);
-
-            if (field != null)
-            {
-                Sprite sprite = ItemUtils.LoadEmbeddedSprite(config.embeddedSpritePath, config.itemId);
-                field.SetValueOptimized(item, sprite);
-            }
         }
 
         public static void RegisterItem(Item item)

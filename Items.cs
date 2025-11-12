@@ -19,7 +19,7 @@ namespace DuckovDrinks
             quality = 3,
             displayQuality = ItemStatsSystem.DisplayQuality.White,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/drink_01.png",
+            spritePath = "items/drink_01.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_drink",
@@ -50,7 +50,7 @@ namespace DuckovDrinks
             displayQuality = ItemStatsSystem.DisplayQuality.White,
             maxStackCount = 5,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/drink_02.png",
+            spritePath = "items/drink_02.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_drink",
@@ -79,7 +79,7 @@ namespace DuckovDrinks
             quality = 4,
             tags = { "Food", "Drink" },
             displayQuality = ItemStatsSystem.DisplayQuality.Green,
-            embeddedSpritePath = "items/iced_tea.png",
+            spritePath = "items/iced_tea.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_drink",
@@ -110,7 +110,7 @@ namespace DuckovDrinks
             quality = 3,
             displayQuality = ItemStatsSystem.DisplayQuality.Green,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/apple_milk.png",
+            spritePath = "items/apple_milk.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_drink",
@@ -140,7 +140,7 @@ namespace DuckovDrinks
             quality = 1,
             displayQuality = ItemStatsSystem.DisplayQuality.White,
             tags = { "Food"},
-            embeddedSpritePath = "items/white_sugar.png",
+            spritePath = "items/white_sugar.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_food",
@@ -170,7 +170,7 @@ namespace DuckovDrinks
             displayQuality = ItemStatsSystem.DisplayQuality.Blue,
             quality = 5,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/orange_soda.png",
+            spritePath = "items/orange_soda.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_cola",
@@ -205,7 +205,7 @@ namespace DuckovDrinks
             displayQuality = ItemStatsSystem.DisplayQuality.Blue,
             quality = 4,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/lemon_soda_can.png",
+            spritePath = "items/lemon_soda_can.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_cola",
@@ -239,7 +239,7 @@ namespace DuckovDrinks
             displayQuality = ItemStatsSystem.DisplayQuality.Blue,
             quality = 4,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/apple_soda_can.png",
+            spritePath = "items/apple_soda_can.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_cola",
@@ -273,7 +273,7 @@ namespace DuckovDrinks
             displayQuality = ItemStatsSystem.DisplayQuality.Blue,
             quality = 4,
             tags = { "Food", "Drink" },
-            embeddedSpritePath = "items/orange_soda_can.png",
+            spritePath = "items/orange_soda_can.png",
             usages = new UsageData
             {
                 actionSound = "SFX/Item/use_cola",
