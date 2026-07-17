@@ -1503,6 +1503,25 @@ void UnregisterCallbacks()
             new Identifier("mymod", "forge"),
             _onBuiltCallback);
 }
+
+// ── 建筑回收回调（v0.7+ 新增）──
+void SetupDemolishCleanup()
+{
+    BuildingUtils.OnBuildingDemolished(
+        new Identifier("mymod", "forge"),
+        building =>
+        {
+            // 清理建筑中生成的 NPC
+            FriendlyNpcUtils.RemoveNpc(new Identifier("mymod", "merchant_forge"));
+        });
+}
+
+void RemoveDemolishCleanup()
+{
+    BuildingUtils.OffBuildingDemolished(
+        new Identifier("mymod", "forge"),
+        _onDemolishCallback);
+}
 ```
 
 ---
@@ -1990,8 +2009,8 @@ GameViews.PerkTree   // Perk 技能树
 GameViews.Building   // 建造面板（BuilderView）
 GameViews.Endowment  // 天赋选择面板
 GameViews.Crafting   // 过滤式合成界面
-GameViews.Shop       // 商店（需自行注册打开方法）
-GameViews.Quest      // 任务（需自行注册打开方法）
+GameViews.Shop       // 商店（自动查找 NPC 的 StockShop 并调用 ShowUI()）
+GameViews.Quest      // 任务（打开 QuestView.Show()）
 
 // 自定义 View 注册打开方法：
 ViewDispatcher.Register(
@@ -2309,6 +2328,18 @@ var config = new FriendlyNpcConfig
     QuestGiverId = "daily_01",
     HeadEquipment = ItemEntry.Of("duckov:CowboyHat", 1),  // 头部装备
     BodyEquipment = ItemEntry.Of("duckov:Vest_A", 1),     // 身体装备
+
+    AutoFacePlayer = true,                                // 🆕 自动面向玩家（v0.7+，内部通过 Movement.ForceTurnTo 驱动）
+    ProximityDialogue = new ProximityDialogueConfig       // 玩家接近时自动播放对话
+    {
+        Distance = 3f,                                    // 触发距离（米）
+        Lines = new[]                                     // 对话内容
+        {
+            new SubtitleLine { Text = "你好！有什么可以帮你的？" },
+            new SubtitleLine { Text = "欢迎来到我的小店！" }
+        },
+        Mode = DialogueTriggerMode.Once,                  // Once（默认）/ Repeatable
+    },
 };
 var preset = FriendlyNpcUtils.RegisterFriendlyNpc(new Identifier("mymod", "merchant_01"), config);
 
@@ -2343,12 +2374,24 @@ var go = FriendlyNpcUtils.CreateFriendlyNpc(id, config);
 
 ### 26.3 角色类型（NpcRole）
 
-| 枚举值 | 行为 |
-|--------|------|
-| `Merchant` | 交互打开商店 UI（需 `ShopId`） |
-| `QuestGiver` | 交互打开任务 UI（需 `QuestGiverId`） |
-| `Companion` | NPC 跟随玩家 |
-| `DialogueOnly` | 仅对话，不绑定额外交互 |
+`NpcRole` 为 `[Flags]` 枚举，支持复合角色（如 `Merchant | QuestGiver`）。
+
+| 枚举值 | 位值 | 行为 |
+|--------|------|------|
+| `None` | `0` | 无角色 |
+| `Merchant` | `1 << 1` | 交互打开商店 UI（自动挂载 `StockShop` 组件，需 `ShopId`） |
+| `QuestGiver` | `1 << 2` | 交互打开任务 UI（需 `QuestGiverId`） |
+| `Companion` | `1 << 4` | NPC 跟随玩家 |
+| `DialogueOnly` | `1 << 5` | 仅对话，不绑定额外交互 |
+| `Neutral` | `1 << 3` | 中立 NPC（不攻击也不交互） |
+| `Enemy` | `1 << 0` | 敌对敌人 |
+
+```csharp
+// 复合角色：既是商人也是任务提供方
+config.Role = NpcRole.Merchant | NpcRole.QuestGiver;
+```
+
+> **注意**：从 v0.7 起 `NpcRole` 从普通枚举升级为 `[Flags]`。旧版代码中 `Role == NpcRole.Merchant` 形式的比较需改为 `Role.HasFlag(NpcRole.Merchant)`。
 
 ### 26.4 其他 API
 
@@ -2619,6 +2662,71 @@ DialogueUtils.PlaySubtitles()
 
 > `DuckovDialogueActor.OnEnable()` 自动调用 `Register(this)`，`OnDisable()` 自动调用 `Unregister(this)`——无需手动注册。
 > `DialogueUI` 是单例（`DialogueUI.instance`），由游戏场景自动管理。
+> `SpawnFriendlyNpcAsync` 在返回前已通过 `SetActorId` → `DuckovDialogueActor.Register()` 确保 Actor 已注册——spawn 完成后可立即调用 `PlaySubtitles`，无需额外等待帧。
+
+### 30.4 对话触发链条（DialogueTrigger）
+
+`DialogueTrigger` 提供事件驱动的对话触发机制，支持三种触发类型和两种触发模式。
+
+#### 触发类型
+
+| API | 触发时机 |
+|-----|---------|
+| `OnProximity(npcId, distance, lines)` | 玩家与 NPC 距离 < `distance` 米时 |
+| `OnQuestAccepted(questId, npcId, lines)` | 指定任务被激活时 |
+| `OnQuestCompleted(questId, npcId, lines)` | 指定任务完成时 |
+
+#### 触发模式（DialogueTriggerMode）
+
+| 模式 | 行为 |
+|------|------|
+| `Once`（默认） | 只触发一次，触发后自动移除监听 |
+| `Repeatable` | 每次满足条件都触发 |
+
+```csharp
+// ── 接近触发（需 NPC 已生成）──
+DialogueTrigger.OnProximity(
+    new Identifier("mymod", "merchant_01"),
+    distance: 3f,
+    lines: new[]
+    {
+        new SubtitleLine { Text = "嘿！你看起来需要帮助。" },
+        new SubtitleLine { Text = "我这儿有你需要的东西。" }
+    },
+    mode: DialogueTriggerMode.Once);
+
+// ── 任务激活时触发（可在任意时机注册）──
+DialogueTrigger.OnQuestAccepted(
+    new Identifier("mymod", "quest_rescue"),
+    new Identifier("mymod", "merchant_01"),
+    new[]
+    {
+        new SubtitleLine { Text = "有新任务了！去看看任务面板。" }
+    },
+    mode: DialogueTriggerMode.Repeatable);
+
+// ── 任务完成时触发 ──
+DialogueTrigger.OnQuestCompleted(
+    new Identifier("mymod", "quest_rescue"),
+    new Identifier("mymod", "merchant_01"),
+    new[]
+    {
+        new SubtitleLine { Text = "任务完成了！这是你的奖励。" }
+    });
+
+// ── 也可以在 FriendlyNpcConfig 中声明式配置接近触发 ──
+config.ProximityDialogue = new ProximityDialogueConfig
+{
+    Distance = 3f,
+    Lines = new[] { new SubtitleLine { Text = "欢迎！" } },
+    Mode = DialogueTriggerMode.Once,
+};
+
+// ── 移除指定 NPC 的所有触发器 ──
+DialogueTrigger.RemoveAllTriggers(new Identifier("mymod", "merchant_01"));
+```
+
+> **技术说明**：`OnProximity` 通过挂载 `NpcProximityTrigger` MonoBehaviour 实现距离检测（每 0.5 秒检查一次）。`OnQuestAccepted` / `OnQuestCompleted` 依赖 `QuestDialoguePatch`（Harmony Patch）桥接游戏原生 `Quest.onActivated` / `Quest.onCompleted` 事件到 FML EventBus，由 `DialogueTrigger.Init()` 自动注册。
 
 ---
 

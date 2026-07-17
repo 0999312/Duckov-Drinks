@@ -20,14 +20,14 @@ namespace DuckovDrinks
             // 注册 mod 路径，供 I18n / Sprite 自动解析
             ModPathResolver.Register(GetModid(), dllPath);
 
-            RegisterNpc();
-            RegisterBuildings();
-            RegisterShop();
-            RegisterQuests();
             RegisterItems();
             RegisterCraftingFormulas();
             RegisterDecomposeFormulas();
-
+            QuestGiverUtils.RegisterQuestGiver(new Identifier(Constants.MODID, NpcConfig.QuestGiverId));
+            RegisterShop();
+            RegisterNpc();
+            RegisterQuests();
+            RegisterBuildings();
             // 初始化本地化（自动处理语言切换）
             I18n.InitI18n(GetModid());
             Debug.Log($"{Constants.MODID} awaked, version: {Constants.VERSION}. Presented by Zaia");
@@ -254,8 +254,9 @@ namespace DuckovDrinks
         {
             // 饮品制作台：1×2，模型从 AssetBundle "drinks" 加载
             Building.BuildingConfig.Register();
-            // 建成回调：生成老政 + 捏脸 + 初次对话
+            // 建成/回收回调：生成/清理老政（对话由 ProximityDialogue 驱动）
             Building.BuildingConfig.RegisterOnBuiltCallback();
+            Building.BuildingConfig.RegisterOnDemolishedCallback();
         }
 
         private void RegisterNpc()
@@ -273,6 +274,7 @@ namespace DuckovDrinks
 
         private void RegisterQuests()
         {
+
             QuestConfig.Register();
         }
     }

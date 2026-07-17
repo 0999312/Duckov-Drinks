@@ -7,7 +7,7 @@ namespace DuckovDrinks.Building
 {
     /// <summary>
     /// 饮品制作台 — 占地 1×2，模型从 AssetBundle "drinks" 加载。
-    /// 建造完成后生成老政 NPC（新版异步 API：SpawnFriendlyNpcAsync）。
+    /// 建造完成后生成老政 NPC（异步 API，回收时自动清理）。
     /// </summary>
     public static class BuildingConfig
     {
@@ -54,7 +54,7 @@ namespace DuckovDrinks.Building
         }
 
         /// <summary>
-        /// 注册建筑建成回调：异步生成老政 → 初次对话。
+        /// 注册建筑建成回调：异步生成老政 NPC。
         /// 捏脸已通过 NpcConfig.Register() 中的 FaceRef.FromJson 在注册时内联。
         /// NPC 装备已通过 NpcConfig.Register() 中的 EquipmentUtils 配置。
         /// </summary>
@@ -64,23 +64,22 @@ namespace DuckovDrinks.Building
             {
                 var spawnPos = building.transform.position + new Vector3(1.5f, 0f, 0f);
 
-                var npcGo = await FriendlyNpcUtils.SpawnFriendlyNpcAsync(
+                await FriendlyNpcUtils.SpawnFriendlyNpcAsync(
                     Npc.NpcConfig.Id, spawnPos);
-
-                if (npcGo != null)
-                {
-                    // 播放初次对话
-                    await DialogueUtils.PlaySubtitles("laozheng", new[]
-                    {
-                        new SubtitleLine { TextKey = "dialogue_laozheng_greet_1" },
-                        new SubtitleLine { TextKey = "dialogue_laozheng_greet_2" },
-                        new SubtitleLine { TextKey = "dialogue_laozheng_greet_3" },
-                        new SubtitleLine { TextKey = "dialogue_laozheng_greet_4" },
-                    });
-                }
             };
 
             BuildingUtils.OnBuildingBuilt(Id, _onBuiltCallback);
+        }
+
+        /// <summary>
+        /// 注册建筑回收回调：建筑被拆除/回收时，清理关联的 NPC。
+        /// </summary>
+        public static void RegisterOnDemolishedCallback()
+        {
+            BuildingUtils.OnBuildingDemolished(Id, building =>
+            {
+                FriendlyNpcUtils.RemoveNpc(Npc.NpcConfig.Id);
+            });
         }
     }
 }

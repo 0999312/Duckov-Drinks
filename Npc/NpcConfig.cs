@@ -9,7 +9,7 @@ namespace DuckovDrinks.Npc
     /// <summary>
     /// NPC 老政 — 零号区饮品铺老板。
     /// 通过建造饮品制作台（DrinkStation）后出现在基地中。
-    /// 角色：商人 + 任务发布者。
+    /// 角色：商人 + 任务发布者（复合角色，自动面向玩家，接近对话由框架 ProximityDialogue 驱动）。
     /// 捏脸通过 FaceRef.FromJson 在注册时直接内联。
     /// </summary>
     public static class NpcConfig
@@ -35,13 +35,25 @@ namespace DuckovDrinks.Npc
             {
                 DisplayNameKey = "npc_laozheng_name",
                 ActorId = "laozheng",
-                Role = NpcRole.Merchant,
+                Role = NpcRole.Merchant | NpcRole.QuestGiver,
                 Face = faceRef,
                 Model = ModelRef.Default,
                 Team = Teams.middle,
                 ShopId = MerchantProfileId.Path, // "Merchant_LaoZheng"
-                QuestGiverId = QuestGiverId,
-                SpawnRotation = Quaternion.identity,
+                QuestGiverId = new Identifier(Constants.MODID, QuestGiverId),
+                AutoFacePlayer = true,
+                ProximityDialogue = new DialogueSequence
+                {
+                    ProximityDistance = 3f,
+                    Lines = new[]
+                    {
+                        new DialogueLine { ActorId = Constants.NPC_LAOZHENG, TextKey = "dialogue_laozheng_greet_1" },
+                        new DialogueLine { ActorId = Constants.NPC_LAOZHENG, TextKey = "dialogue_laozheng_greet_2" },
+                        new DialogueLine { ActorId = Constants.NPC_LAOZHENG, TextKey = "dialogue_laozheng_greet_3" },
+                        new DialogueLine { ActorId = Constants.NPC_LAOZHENG, TextKey = "dialogue_laozheng_greet_4" },
+                    },
+                    Mode = DialogueTriggerMode.Once,
+                },
                 BodyEquipment = ItemEntry.Of(outfitId, 1)
             };
 
