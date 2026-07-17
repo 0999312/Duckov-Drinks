@@ -1,0 +1,6 @@
+{
+    "modid": "dockov_drinks",
+    "priority": 100,
+    "dependencies": ["FeatherMod"],
+    "autoActivate": true
+}
